@@ -1,3 +1,5 @@
+
+
 import React, { useState } from "react";
 import {
   View,
@@ -6,21 +8,28 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Eye, EyeOff } from "lucide-react-native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 interface LoginResponse {
   token?: string;
   error?: string;
 }
 
+type RootStackParamList = {
+  SignUp: undefined;
+  Login: undefined;
+  Home: undefined;
+};
+
 const Login = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleChange = (name: string, value: string) => {
@@ -30,49 +39,49 @@ const Login = () => {
     }));
   };
 
-const handleSubmit = async () => {
-   try {
-     const response = await fetch("http://192.168.50.187:5000/users/login", {
-       method: "POST",
-       headers: {
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify(formData),
-     });
- 
-     if (response.ok) {
-       const data = await response.json();
-       if (data.token) {
-         // Save token to AsyncStorage
-         await AsyncStorage.setItem("token", data.token);
-         Alert.alert("Login Successful", "Welcome back!");
-         navigation.navigate("Home");
-       } else {
-         setError("No token received.");
-       }
-     } else {
-       const errorText = await response.text();
-       setError(errorText || "An error occurred. Please try again.");
-     }
-   } catch (err) {
-     console.error("Error:", err);
-     setError("Unable to connect to the server. Please try again later.");
-   }
- };
- 
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://192.168.50.187:5000/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.token) {
+          await AsyncStorage.setItem("token", data.token);
+          Alert.alert("Login Successful", "Welcome back!");
+          navigation.navigate("Home");
+        } else {
+          setError("No token received.");
+        }
+      } else {
+        const errorText = await response.text();
+        setError(errorText || "An error occurred. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError("Unable to connect to the server. Please try again later.");
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.loginCard}>
-        <Text style={styles.title}>Login</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={formData.email}
-          onChangeText={(text) => handleChange("email", text)}
-        />
-<View style={styles.passwordContainer}>
+      <Text style={styles.title}>Lets Sign you in</Text>
+      <Text style={styles.subtitle}>Welcome Back, You have been missed</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Email, phone & username"
+        keyboardType="email-address"
+        value={formData.email}
+        onChangeText={(text) => handleChange("email", text)}
+      />
+      
+      <View style={styles.passwordContainer}>
         <TextInput
           style={styles.input}
           placeholder="Password"
@@ -80,28 +89,29 @@ const handleSubmit = async () => {
           value={formData.password}
           onChangeText={(text) => handleChange("password", text)}
         />
-
         <TouchableOpacity
-                    onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                    style={styles.eyeIcon}
-                  >
-                    {isPasswordVisible ? <EyeOff size={20} color="#190c25" /> : <Eye size={20} color="#190c25" />}
-                  </TouchableOpacity></View>
-
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Login</Text>
+          onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+          style={styles.eyeIcon}
+        >
+          {isPasswordVisible ? <EyeOff size={20} color="#000" /> : <Eye size={20} color="#000" />}
         </TouchableOpacity>
-        {error ? <Text style={styles.errorMessage}>{error}</Text> : null}
-        <Text style={styles.registerLink}>
-          Don&apos;t have an account?{" "}
-          <Text
-            style={styles.registerLinkText}
-            onPress={() => navigation.navigate("SignUp")}
-          >
-            Create one
-          </Text>
-        </Text>
       </View>
+      
+      <TouchableOpacity>
+        <Text style={styles.forgotPassword}>Forgot Password?</Text>
+      </TouchableOpacity>
+      
+      <TouchableOpacity style={styles.signInButton} onPress={handleSubmit}>
+        <Text style={styles.signInText}>Sign in</Text>
+      </TouchableOpacity>
+      
+      <Text style={styles.orText}>or</Text>
+      
+      
+      
+      <Text style={styles.registerText}>
+        Don&apos;t have an account? <Text style={styles.registerLink} onPress={() => navigation.navigate("SignUp")}>Register Now</Text>
+      </Text>
     </View>
   );
 };
@@ -111,74 +121,76 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#eee1f8",
-  },
-  loginCard: {
-    width: "90%",
-    maxWidth: 400,
+    backgroundColor: "#F4FCFF",
     padding: 20,
-    backgroundColor: "white",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 4,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
-    textAlign: "center",
-    color: "#190c25",
+    color: "#000",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#444",
     marginBottom: 20,
   },
-  passwordContainer:{
+  input: {
+    width: "100%",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 15,
+  },
+  passwordContainer: {
+    width: "100%",
     position: "relative",
   },
   eyeIcon: {
     position: "absolute",
-    right: 10,
+    right: 15,
     top: 15,
-    zIndex: 1,
   },
-  input: {
-    width: "100%",
-    backgroundColor: "#f3f4f6",
-    padding: 12,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    fontSize: 14,
+  forgotPassword: {
+    alignSelf: "flex-end",
+    color: "#6A5AE0", //#6A5AE0
+    marginBottom: 20,
   },
-  submitButton: {
+  signInButton: {
     width: "100%",
-    backgroundColor: "#12071a",
+    backgroundColor: "#6A5AE0",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
   },
-  submitButtonText: {
+  signInText: {
     color: "white",
-    fontWeight: "600",
-    fontSize: 14,
+    fontWeight: "bold",
+    fontSize: 16,
   },
-  errorMessage: {
-    textAlign: "center",
-    color: "#ef4444",
-    marginTop: 10,
+  orText: {
+    marginVertical: 15,
     fontSize: 14,
+    color: "#666",
+  },
+  socialIconsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+  },
+  socialIcon: {
+    width: 40,
+    height: 40,
+  },
+  registerText: {
+    marginTop: 15,
+    fontSize: 14,
+    color: "#333",
   },
   registerLink: {
-    textAlign: "center",
-    fontSize: 14,
-    color: "#4b5563",
-    marginTop: 15,
-  },
-  registerLinkText: {
-    color: "#190c25",
-    fontWeight: "500",
-    textDecorationLine: "underline",
+    color: "#6A5AE0",
+    fontWeight: "bold",
   },
 });
 

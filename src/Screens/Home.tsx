@@ -11,11 +11,19 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+type RootStackParamList = {
+  SignUp: undefined;
+  Login: undefined;
+  Home: undefined;
+};
+
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
   const [coins, setCoins] = useState(0);
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const fetchCoins = async () => {
