@@ -40,8 +40,13 @@ export default function SignUpScreen() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          fullname: formData.fullname,
+          email: formData.email,
+          password: formData.password,
+        }),
       });
+
 
       const data = await response.json();
 
